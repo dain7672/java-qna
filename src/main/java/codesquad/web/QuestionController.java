@@ -1,9 +1,6 @@
 package codesquad.web;
 
-import codesquad.web.domain.AnswerRepository;
-import codesquad.web.domain.Question;
-import codesquad.web.domain.QuestionRepository;
-import codesquad.web.domain.User;
+import codesquad.web.domain.*;
 import codesquad.web.util.RepositoryUtil;
 import codesquad.web.util.SessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Controller
 @RequestMapping("/questions")
@@ -31,7 +29,9 @@ public class QuestionController {
     @GetMapping("/{id}")
     public String show(@PathVariable long id, Model model){
         model.addAttribute("question", RepositoryUtil.findQuestionById(id, questionRepository));
-        model.addAttribute("answers", RepositoryUtil.findAnswersByQuestionId(id, answerRepository));
+        List<Answer> answers = RepositoryUtil.findAnswersByQuestionId(id, answerRepository);
+        model.addAttribute("answers", answers);
+        model.addAttribute("count", answers.size());
         return "/qna/show";
     }
 

@@ -15,13 +15,12 @@ public class Question {
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
     private User writer;
-    private boolean deleted;
+    private boolean deleted = false;
 
     @OneToMany(mappedBy = "question")
     private List<Answer> answers;
 
     public Question() {
-        this.deleted = false;
     }
 
     public Question(String title, String contents, User writer) {
@@ -81,21 +80,16 @@ public class Question {
         if (!this.writer.equals(writer)) {
             return false;
         }
-        for (Answer answer : this.answers) {
-            if (!answer.matchWriter(writer)) {
-                return false;
-            }
-        }
-        return true;
+        return this.answers
+                .stream()
+                .allMatch(answer -> answer.matchWriter(writer));
     }
 
     public void delete(User writer) {
         if (deletable(writer)) {
             setDeleted(true);
-            for (Answer answer : this.answers) {
-                answer.setDeleted(true);
-            }
+            this.answers.stream()
+                    .forEach(answer -> answer.setDeleted(true));
         }
     }
-
 }
