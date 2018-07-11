@@ -1,5 +1,6 @@
 package codesquad.web;
 
+import codesquad.web.domain.AnswerRepository;
 import codesquad.web.domain.Question;
 import codesquad.web.domain.QuestionRepository;
 import codesquad.web.domain.User;
@@ -17,6 +18,8 @@ import javax.servlet.http.HttpSession;
 public class QuestionController {
     @Autowired
     private QuestionRepository questionRepository;
+    @Autowired
+    private AnswerRepository answerRepository;
 
     @PostMapping
     public String create(Question question, HttpSession session) {
@@ -28,6 +31,7 @@ public class QuestionController {
     @GetMapping("/{id}")
     public String show(@PathVariable long id, Model model){
         model.addAttribute("question", RepositoryUtil.findQuestionById(id, questionRepository));
+        model.addAttribute("answers", RepositoryUtil.findAnswersByQuestionId(id, answerRepository));
         return "/qna/show";
     }
 
@@ -55,22 +59,17 @@ public class QuestionController {
         Question question = RepositoryUtil.findQuestionById(id, questionRepository);
         User writer = question.getWriter();
         User loginUser = SessionUtil.getUser(session);
-        if(loginUser == null){
-            return "users/loginForm";
-        }
         if(!writer.equals(loginUser)) {
             throw new IllegalArgumentException("다른 사람의 글은 삭제할 수 없어");
         }
-        questionRepository.delete(question);
+        question.delete(loginUser);
+        questionRepository.save(question);
         return "redirect:/";
     }
 
     @GetMapping("/form")
     public String form(HttpSession session){
         User loginUser = SessionUtil.getUser(session);
-        if (loginUser == null) {
-            return "redirect:/users/loginForm";
-        }
         return "qna/form";
     }
 }

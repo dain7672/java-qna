@@ -1,6 +1,7 @@
 package codesquad.web.domain;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class Question {
@@ -14,14 +15,28 @@ public class Question {
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
     private User writer;
+    private boolean deleted;
+
+    @OneToMany(mappedBy = "question")
+    private List<Answer> answers;
 
     public Question() {
+        this.deleted = false;
     }
 
     public Question(String title, String contents, User writer) {
         this.writer = writer;
         this.title = title;
         this.contents = contents;
+        this.deleted = false;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Long getId() {
@@ -61,4 +76,26 @@ public class Question {
         this.title = question.getTitle();
         this.contents = question.getContents();
     }
+
+    public boolean deletable(User writer) {
+        if (!this.writer.equals(writer)) {
+            return false;
+        }
+        for (Answer answer : this.answers) {
+            if (!answer.matchWriter(writer)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void delete(User writer) {
+        if (deletable(writer)) {
+            setDeleted(true);
+            for (Answer answer : this.answers) {
+                answer.setDeleted(true);
+            }
+        }
+    }
+
 }
