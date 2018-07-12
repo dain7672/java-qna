@@ -70,6 +70,14 @@ public class Question {
         this.contents = contents;
     }
 
+    public List<Answer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<Answer> answers) {
+        this.answers = answers;
+    }
+
     public void update(Question question) {
         this.writer = question.getWriter();
         this.title = question.getTitle();
@@ -89,7 +97,7 @@ public class Question {
         if (deletable(writer)) {
             setDeleted(true);
             this.answers.stream()
-                    .forEach(answer -> answer.setDeleted(true));
+                    .forEach(answer -> answer.delete());
         }
     }
 }

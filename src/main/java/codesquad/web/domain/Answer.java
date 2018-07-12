@@ -1,5 +1,7 @@
 package codesquad.web.domain;
 
+import codesquad.web.exception.NoLoginException;
+
 import javax.persistence.*;
 
 @Entity
@@ -70,5 +72,20 @@ public class Answer {
 
     public boolean matchWriter(User writer) {
         return this.writer.equals(writer);
+    }
+
+    public boolean delete() {
+        if (this.deleted) {
+            throw new IllegalArgumentException("이미 존재하지 않는 댓글입니다.");
+        }
+        setDeleted(true);
+        return true;
+    }
+
+    public boolean delete(User writer) {
+        if (!matchWriter(writer)) {
+            return false;
+        }
+        return delete();
     }
 }

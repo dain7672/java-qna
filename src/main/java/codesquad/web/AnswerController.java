@@ -36,10 +36,9 @@ public class AnswerController {
 
     @DeleteMapping("/{answerId}")
     public String delete(@PathVariable Long questionId, @PathVariable Long answerId, HttpSession session) {
-        if (!SessionUtil.matchUser(session, RepositoryUtil.findAnswerById(answerId, answerRepository).getWriter())) {
+        if (!RepositoryUtil.setDeleted(answerRepository, answerId, session)) {
             throw new IllegalArgumentException("다른 작성자의 댓글을 지울 수 없습니다.");
         }
-        RepositoryUtil.setDeleted(answerRepository, answerId);
         return "redirect:/questions/{questionId}";
     }
 }

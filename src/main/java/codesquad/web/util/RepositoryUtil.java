@@ -3,6 +3,7 @@ package codesquad.web.util;
 import codesquad.web.domain.*;
 import org.springframework.data.repository.CrudRepository;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,10 +29,13 @@ public class RepositoryUtil {
         return ar.findById(id).get();
     }
 
-    public static void setDeleted(AnswerRepository repository, Long answerId) {
+    public static boolean setDeleted(AnswerRepository repository, Long answerId, HttpSession session) {
         Answer answer = findAnswerById(answerId, repository);
-        answer.setDeleted(true);
+        if (!answer.delete(SessionUtil.getUser(session))) {
+            return false;
+        }
         repository.save(answer);
+        return true;
     }
 
     public static List<Question> findQuestions(QuestionRepository qr) {
